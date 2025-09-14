@@ -1,0 +1,9 @@
+# Relay server configuration
+port: 8443
+tls_cert_path: "../certs/relay.crt"
+tls_key_path: "../certs/relay.key"
+jwt_secret: "61de5a6c662df30a46adea17846973f693a19d883ac351d92943e2a574104101"
+max_connections_per_host: 10
+connection_timeout: 300
+keepalive_interval: 30
+log_level: "info"

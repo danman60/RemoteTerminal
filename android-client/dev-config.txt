@@ -1,0 +1,22 @@
+Development Configuration for Android Client:
+============================================
+
+Host ID: 2e53e7f6-1417-4531-a5eb-23dee63d261e
+Device Key (store in EncryptedSharedPreferences): f085aed2a465dc0bdb352074fc459fb1f1f2391878540ea3dc1cf4f5b0e47313
+
+Certificate Pins (add to CertPinning.kt):
+CA: IEt9OBD47HOVTxdWOwbB5+2zWV5ioCvRxrpX+/fnMuI=
+Relay: c32asEmeiXEqsnjnkCTyY3UGyXOIRGJws3LSY5RE1HU=
+Host: d1E1sN8Wh4d1EUi3ctRT3wJ4NyqUtEIQB3T5MLYP7tc=
+
+Default Endpoints:
+Relay: wss://localhost:8443
+Host (direct): wss://[host-ip]:8443
+
+How to update Android app:
+1. Edit android-client/app/src/main/java/com/rtx/app/security/CertPinning.kt
+2. Replace the pins in PINNED_CERTIFICATES map:
+   "ca" to "IEt9OBD47HOVTxdWOwbB5+2zWV5ioCvRxrpX+/fnMuI=",
+   "relay" to "c32asEmeiXEqsnjnkCTyY3UGyXOIRGJws3LSY5RE1HU=",
+   "host" to "d1E1sN8Wh4d1EUi3ctRT3wJ4NyqUtEIQB3T5MLYP7tc="
+3. Rebuild the Android app

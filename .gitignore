@@ -1,0 +1,95 @@
+# Build outputs
+**/bin/
+**/obj/
+**/build/
+**/dist/
+**/target/
+**/out/
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+**/logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Go specific
+vendor/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+go.work.sum
+
+# .NET specific
+[Dd]ebug/
+[Rr]elease/
+[Oo]bj/
+[Bb]in/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+packages/
+.vs/
+
+# Android specific
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+.navigation/
+captures/
+output.json
+*.jks
+*.keystore
+google-services.json
+.cxx/
+
+# Certificate private keys (keep public certs for development)
+*.key
+!certs/*.key
+ca.srl
+
+# Runtime configuration that might contain secrets
+DeviceRegistry.json
+
+# Test results
+coverage/
+test-results/
+*.trx
+*.coverage
