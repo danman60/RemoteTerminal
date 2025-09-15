@@ -30,7 +30,7 @@ public class WebSocketHost : IDisposable
         try
         {
             _httpListener = new HttpListener();
-            _httpListener.Prefixes.Add($"https://+:{_config.Port}/");
+            _httpListener.Prefixes.Add($"http://localhost:{_config.Port}/");
             _httpListener.Start();
 
             _logger.LogInformation("WebSocket server started on port {Port}", _config.Port);

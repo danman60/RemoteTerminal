@@ -1,4 +1,5 @@
 using System.Text;
+using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 using static HostService.ConPty.NativeMethods;
 

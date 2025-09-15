@@ -3,7 +3,11 @@ package com.rtx.app.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rtx.app.net.RtxWebSocket
-import com.rtx.app.protocol.Protocol
+import com.rtx.app.protocol.*
+import com.rtx.app.protocol.Protocol.createStdinInputMessage
+import com.rtx.app.protocol.Protocol.createVtInputMessage
+import com.rtx.app.protocol.Protocol.createResizeMessage
+import com.rtx.app.protocol.Protocol.createSignalMessage
 import com.rtx.app.input.KeyMapper
 import com.rtx.app.input.VoiceInput
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,7 +77,7 @@ class TerminalViewModel : ViewModel() {
         val command = _inputText.value
         if (command.isNotBlank() && _connectionState.value == ConnectionState.Connected) {
             viewModelScope.launch {
-                val message = Protocol.createStdinInputMessage(command + "\r\n")
+                val message = createStdinInputMessage(command + "\r\n")
                 webSocket.sendMessage(message)
                 _inputText.value = ""
             }
@@ -85,7 +89,7 @@ class TerminalViewModel : ViewModel() {
             viewModelScope.launch {
                 val vtSequence = keyMapper.mapKey(key)
                 if (vtSequence != null) {
-                    val message = Protocol.createVtInputMessage(vtSequence)
+                    val message = createVtInputMessage(vtSequence)
                     webSocket.sendMessage(message)
                 }
             }
@@ -105,7 +109,7 @@ class TerminalViewModel : ViewModel() {
     fun resizeTerminal(cols: Int, rows: Int) {
         if (_connectionState.value == ConnectionState.Connected) {
             viewModelScope.launch {
-                val message = Protocol.createResizeMessage(cols, rows)
+                val message = createResizeMessage(cols, rows)
                 webSocket.sendMessage(message)
             }
         }
@@ -114,18 +118,18 @@ class TerminalViewModel : ViewModel() {
     fun sendSignal(signal: String) {
         if (_connectionState.value == ConnectionState.Connected) {
             viewModelScope.launch {
-                val message = Protocol.createSignalMessage(signal)
+                val message = createSignalMessage(signal)
                 webSocket.sendMessage(message)
             }
         }
     }
 
-    private fun handleIncomingMessage(message: Protocol.BaseMessage) {
+    private fun handleIncomingMessage(message: BaseMessage) {
         when (message) {
-            is Protocol.AuthOkMessage -> {
+            is AuthOkMessage -> {
                 appendOutput("Terminal connected - ${message.shell} (${message.pty.cols}x${message.pty.rows})")
             }
-            is Protocol.StdoutChunkMessage -> {
+            is StdoutChunkMessage -> {
                 // Data is base64 encoded
                 try {
                     val decoded = android.util.Base64.decode(message.data, android.util.Base64.DEFAULT)
@@ -135,10 +139,10 @@ class TerminalViewModel : ViewModel() {
                     appendOutput("Error decoding output: ${e.message}")
                 }
             }
-            is Protocol.ErrorMessage -> {
+            is ErrorMessage -> {
                 appendOutput("Error: ${message.message}")
             }
-            is Protocol.PongMessage -> {
+            is PongMessage -> {
                 // Handle keepalive response
             }
         }

@@ -1,9 +1,11 @@
 package com.rtx.app.net
 
-import com.rtx.app.protocol.Protocol
+import com.rtx.app.protocol.*
 import com.rtx.app.security.CertPinning
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -23,7 +25,7 @@ class RtxWebSocket {
     }
 
     var onConnectionStateChanged: ((State) -> Unit)? = null
-    var onMessageReceived: ((Protocol.BaseMessage) -> Unit)? = null
+    var onMessageReceived: ((BaseMessage) -> Unit)? = null
     var onOutputReceived: ((String) -> Unit)? = null
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -54,14 +56,14 @@ class RtxWebSocket {
         onConnectionStateChanged?.invoke(State.DISCONNECTED)
     }
 
-    suspend fun sendMessage(message: Protocol.BaseMessage) = withContext(Dispatchers.IO) {
+    suspend fun sendMessage(message: BaseMessage) = withContext(Dispatchers.IO) {
         try {
             val messageJson = when (message) {
-                is Protocol.AuthMessage -> json.encodeToString(Protocol.AuthMessage.serializer(), message)
-                is Protocol.StdinInputMessage -> json.encodeToString(Protocol.StdinInputMessage.serializer(), message)
-                is Protocol.ResizeMessage -> json.encodeToString(Protocol.ResizeMessage.serializer(), message)
-                is Protocol.SignalMessage -> json.encodeToString(Protocol.SignalMessage.serializer(), message)
-                is Protocol.PingMessage -> json.encodeToString(Protocol.PingMessage.serializer(), message)
+                is AuthMessage -> json.encodeToString(AuthMessage.serializer(), message)
+                is StdinInputMessage -> json.encodeToString(StdinInputMessage.serializer(), message)
+                is ResizeMessage -> json.encodeToString(ResizeMessage.serializer(), message)
+                is SignalMessage -> json.encodeToString(SignalMessage.serializer(), message)
+                is PingMessage -> json.encodeToString(PingMessage.serializer(), message)
                 else -> return@withContext
             }
 
@@ -98,7 +100,7 @@ class RtxWebSocket {
                 // Send authentication message
                 coroutineScope.launch {
                     val deviceKey = getStoredDeviceKey() ?: generateAndStoreDeviceKey()
-                    val authMessage = Protocol.AuthMessage(
+                    val authMessage = AuthMessage(
                         deviceKey = deviceKey,
                         hostId = "", // Will be set by discovery or manual entry
                         clientVersion = "1.0.0"
@@ -139,10 +141,10 @@ class RtxWebSocket {
             val messageType = jsonElement.jsonObject["type"]?.jsonPrimitive?.content
 
             val message = when (messageType) {
-                "auth_ok" -> json.decodeFromString<Protocol.AuthOkMessage>(messageText)
-                "stdout_chunk" -> json.decodeFromString<Protocol.StdoutChunkMessage>(messageText)
-                "error" -> json.decodeFromString<Protocol.ErrorMessage>(messageText)
-                "pong" -> json.decodeFromString<Protocol.PongMessage>(messageText)
+                "auth_ok" -> json.decodeFromString<AuthOkMessage>(messageText)
+                "stdout_chunk" -> json.decodeFromString<StdoutChunkMessage>(messageText)
+                "error" -> json.decodeFromString<ErrorMessage>(messageText)
+                "pong" -> json.decodeFromString<PongMessage>(messageText)
                 else -> {
                     onOutputReceived?.invoke("Unknown message type: $messageType")
                     return

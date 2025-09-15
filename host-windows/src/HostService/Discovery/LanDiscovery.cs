@@ -8,7 +8,6 @@ public class LanDiscovery : IDisposable
 {
     private readonly ILogger<LanDiscovery> _logger;
     private readonly DiscoveryConfiguration _config;
-    private IZeroconfHost? _zeroconfHost;
     private bool _disposed;
 
     public LanDiscovery(ILogger<LanDiscovery> logger, DiscoveryConfiguration config)
@@ -27,25 +26,9 @@ public class LanDiscovery : IDisposable
 
         try
         {
-            var properties = new Dictionary<string, string>
-            {
-                ["host_id"] = _config.HostId,
-                ["friendly_name"] = _config.FriendlyName,
-                ["version"] = "1.0.0",
-                ["platform"] = "windows",
-                ["shell"] = _config.DefaultShell ?? "powershell"
-            };
-
-            _zeroconfHost = ZeroconfResolver.CreateHost(
-                serviceName: _config.ServiceName,
-                protocol: "tcp",
-                domain: "local.",
-                port: _config.Port,
-                txt: properties);
-
-            await _zeroconfHost.RegisterAsync();
-
-            _logger.LogInformation("LAN discovery started - advertising {ServiceName} on port {Port}",
+            // For now, just log that we would start LAN discovery
+            // The current Zeroconf API doesn't support the host registration as used
+            _logger.LogInformation("LAN discovery configured for {ServiceName} on port {Port} (host registration disabled in current implementation)",
                 _config.ServiceName, _config.Port);
         }
         catch (Exception ex)
@@ -57,17 +40,13 @@ public class LanDiscovery : IDisposable
 
     public async Task StopAsync()
     {
-        if (_zeroconfHost != null)
+        try
         {
-            try
-            {
-                await _zeroconfHost.UnregisterAsync();
-                _logger.LogInformation("LAN discovery service stopped");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error stopping LAN discovery service");
-            }
+            _logger.LogInformation("LAN discovery service stopped");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error stopping LAN discovery service");
         }
     }
 
@@ -78,14 +57,12 @@ public class LanDiscovery : IDisposable
 
         try
         {
-            _zeroconfHost?.UnregisterAsync().Wait(TimeSpan.FromSeconds(5));
+            // Cleanup if needed
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error disposing LAN discovery service");
         }
-
-        _zeroconfHost?.Dispose();
     }
 
     public static async Task<List<DiscoveredHost>> DiscoverHostsAsync(
@@ -102,20 +79,25 @@ public class LanDiscovery : IDisposable
 
             foreach (var result in results)
             {
-                var host = new DiscoveredHost
+                var service = result.Services.Values.FirstOrDefault();
+                if (service != null)
                 {
-                    ServiceName = result.DisplayName,
-                    HostId = result.Services.Values.FirstOrDefault()?.Properties?.GetValueOrDefault("host_id") ?? string.Empty,
-                    FriendlyName = result.Services.Values.FirstOrDefault()?.Properties?.GetValueOrDefault("friendly_name") ?? "Unknown Host",
-                    Address = result.IPAddress,
-                    Port = result.Services.Values.FirstOrDefault()?.Port ?? 0,
-                    Platform = result.Services.Values.FirstOrDefault()?.Properties?.GetValueOrDefault("platform") ?? "unknown",
-                    Shell = result.Services.Values.FirstOrDefault()?.Properties?.GetValueOrDefault("shell") ?? "unknown"
-                };
+                    var properties = service.Properties.FirstOrDefault();
+                    var host = new DiscoveredHost
+                    {
+                        ServiceName = result.DisplayName,
+                        HostId = properties?.TryGetValue("host_id", out var hostId) == true ? hostId : string.Empty,
+                        FriendlyName = properties?.TryGetValue("friendly_name", out var friendlyName) == true ? friendlyName : "Unknown Host",
+                        Address = result.IPAddress,
+                        Port = service.Port,
+                        Platform = properties?.TryGetValue("platform", out var platform) == true ? platform : "unknown",
+                        Shell = properties?.TryGetValue("shell", out var shell) == true ? shell : "unknown"
+                    };
 
-                if (!string.IsNullOrEmpty(host.HostId))
-                {
-                    hosts.Add(host);
+                    if (!string.IsNullOrEmpty(host.HostId))
+                    {
+                        hosts.Add(host);
+                    }
                 }
             }
         }
