@@ -6,7 +6,9 @@ import java.util.Date
 
 @Serializable
 abstract class BaseMessage {
+    @SerialName("type")
     abstract val type: String
+    @SerialName("timestamp")
     val timestamp: Long = System.currentTimeMillis()
 }
 
