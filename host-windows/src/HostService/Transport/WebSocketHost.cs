@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using HostService.Protocol;
 using HostService.ConPty;
 using HostService.Security;
+using HostService.Terminal;
 
 namespace HostService.Transport;
 
@@ -14,15 +15,17 @@ public class WebSocketHost : IDisposable
     private readonly ILogger<WebSocketHost> _logger;
     private readonly DeviceRegistry _deviceRegistry;
     private readonly HostConfiguration _config;
+    private readonly TerminalDiscovery _terminalDiscovery;
     private HttpListener? _httpListener;
     private CancellationTokenSource _cancellationTokenSource = new();
     private bool _disposed;
 
-    public WebSocketHost(ILogger<WebSocketHost> logger, DeviceRegistry deviceRegistry, HostConfiguration config)
+    public WebSocketHost(ILogger<WebSocketHost> logger, DeviceRegistry deviceRegistry, HostConfiguration config, TerminalDiscovery terminalDiscovery)
     {
         _logger = logger;
         _deviceRegistry = deviceRegistry;
         _config = config;
+        _terminalDiscovery = terminalDiscovery;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken = default)
@@ -98,6 +101,7 @@ public class WebSocketHost : IDisposable
         }
 
         WebSocket? webSocket = null;
+        TerminalAttachment? terminalAttachment = null;
         ConPtySession? conPtySession = null;
 
         try
@@ -116,9 +120,40 @@ public class WebSocketHost : IDisposable
                 return;
             }
 
-            // Create ConPTY session
-            var shell = GetShellCommand(_config.DefaultShell);
-            conPtySession = ConPtySession.Create(shell, _config.Pty.InitialCols, _config.Pty.InitialRows);
+            // Try to discover and attach to existing terminal, fallback to ConPTY
+            _logger.LogInformation("Discovering existing terminals...");
+            var targetTerminal = _terminalDiscovery.FindClaudeCodeTerminal();
+
+            if (targetTerminal != null)
+            {
+                _logger.LogInformation($"Found terminal: {targetTerminal.ProcessName} (PID: {targetTerminal.ProcessId}) - {targetTerminal.WindowTitle}");
+
+                // Try terminal attachment first
+                using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+                var attachmentLogger = loggerFactory.CreateLogger<TerminalAttachment>();
+                terminalAttachment = new TerminalAttachment(targetTerminal, attachmentLogger);
+
+                if (terminalAttachment.AttachToTerminal())
+                {
+                    _logger.LogInformation("Successfully attached to existing terminal");
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to attach to existing terminal, falling back to ConPTY");
+                    terminalAttachment?.Dispose();
+                    terminalAttachment = null;
+                }
+            }
+
+            // Fallback to ConPTY if no terminal found or attachment failed
+            if (terminalAttachment == null)
+            {
+                _logger.LogInformation("Creating new ConPTY session as fallback");
+                var shell = GetShellCommand(_config.DefaultShell);
+                _logger.LogInformation("Creating ConPTY session with shell: {Shell}", shell);
+                conPtySession = ConPtySession.Create(shell, _config.Pty.InitialCols, _config.Pty.InitialRows);
+                _logger.LogInformation("ConPTY session created successfully");
+            }
 
             // Send auth success
             var authOk = new AuthOkMessage
@@ -128,36 +163,69 @@ public class WebSocketHost : IDisposable
                     Cols = _config.Pty.InitialCols,
                     Rows = _config.Pty.InitialRows
                 },
-                Shell = _config.DefaultShell
+                Shell = terminalAttachment != null ? targetTerminal!.ProcessName : _config.DefaultShell
             };
             await SendMessageAsync(webSocket, authOk);
 
-            // Set up ConPTY event handlers
-            conPtySession.DataReceived += async (data) =>
+            // Set up event handlers based on which system is being used
+            if (terminalAttachment != null)
             {
-                var message = new StdoutChunkMessage
+                // Set up terminal attachment event handlers
+                terminalAttachment.DataReceived += async (data) =>
                 {
-                    Data = Convert.ToBase64String(data)
+                    var message = new StdoutChunkMessage
+                    {
+                        Data = Convert.ToBase64String(data)
+                    };
+                    await SendMessageAsync(webSocket, message);
                 };
-                await SendMessageAsync(webSocket, message);
-            };
 
-            conPtySession.ProcessExited += async () =>
+                terminalAttachment.ProcessExited += async () =>
+                {
+                    _logger.LogInformation("Terminal process exited");
+                    try
+                    {
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure,
+                            "Terminal process exited", cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Error closing WebSocket after process exit");
+                    }
+                };
+
+                // Handle WebSocket messages with terminal attachment
+                await HandleWebSocketMessagesAsync(webSocket, terminalAttachment, cancellationToken);
+            }
+            else if (conPtySession != null)
             {
-                _logger.LogInformation("Terminal process exited");
-                try
+                // Set up ConPTY event handlers
+                conPtySession.DataReceived += async (data) =>
                 {
-                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure,
-                        "Terminal process exited", cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Error closing WebSocket after process exit");
-                }
-            };
+                    var message = new StdoutChunkMessage
+                    {
+                        Data = Convert.ToBase64String(data)
+                    };
+                    await SendMessageAsync(webSocket, message);
+                };
 
-            // Handle WebSocket messages
-            await HandleWebSocketMessagesAsync(webSocket, conPtySession, cancellationToken);
+                conPtySession.ProcessExited += async () =>
+                {
+                    _logger.LogInformation("Terminal process exited");
+                    try
+                    {
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure,
+                            "Terminal process exited", cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Error closing WebSocket after process exit");
+                    }
+                };
+
+                // Handle WebSocket messages with ConPTY
+                await HandleWebSocketMessagesAsync(webSocket, conPtySession, cancellationToken);
+            }
         }
         catch (WebSocketException ex)
         {
@@ -169,6 +237,7 @@ public class WebSocketHost : IDisposable
         }
         finally
         {
+            terminalAttachment?.Dispose();
             conPtySession?.Dispose();
 
             if (webSocket?.State == WebSocketState.Open)
@@ -218,19 +287,28 @@ public class WebSocketHost : IDisposable
             }
             _logger.LogInformation("Authentication message received: {Message}", messageJson);
 
-            // Check message type first
+            // Check message type first (but be lenient for auth messages)
             using var document = JsonDocument.Parse(messageJson);
-            if (!document.RootElement.TryGetProperty("type", out var typeElement))
-            {
-                _logger.LogWarning("Message missing 'type' property");
-                return (false, "Authentication message must have 'type' property");
-            }
+            bool hasDeviceKey = document.RootElement.TryGetProperty("device_key", out _);
+            bool hasClientVersion = document.RootElement.TryGetProperty("client_version", out _);
 
-            var typeProperty = typeElement.GetString();
-            if (typeProperty != "auth")
+            if (document.RootElement.TryGetProperty("type", out var typeElement))
             {
-                _logger.LogWarning("Expected auth message, received: {MessageType}", typeProperty);
-                return (false, $"Expected authentication message, received: {typeProperty}");
+                var typeProperty = typeElement.GetString();
+                if (typeProperty != "auth")
+                {
+                    _logger.LogWarning("Expected auth message, received: {MessageType}", typeProperty);
+                    return (false, $"Expected authentication message, received: {typeProperty}");
+                }
+            }
+            else if (hasDeviceKey && hasClientVersion)
+            {
+                _logger.LogInformation("Authentication message missing 'type' property but has correct auth fields - accepting");
+            }
+            else
+            {
+                _logger.LogWarning("Message missing 'type' property and does not appear to be authentication");
+                return (false, "Message must have 'type' property or be a valid authentication message");
             }
 
             var message = JsonSerializer.Deserialize<AuthMessage>(messageJson);
@@ -266,6 +344,47 @@ public class WebSocketHost : IDisposable
         {
             _logger.LogError(ex, "Error during authentication");
             return (false, "Authentication error");
+        }
+    }
+
+    private async Task HandleWebSocketMessagesAsync(WebSocket webSocket, TerminalAttachment terminalAttachment,
+        CancellationToken cancellationToken)
+    {
+        var buffer = new byte[_config.Pty.BufferSize];
+
+        while (webSocket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
+
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    break;
+                }
+
+                if (result.MessageType != WebSocketMessageType.Text)
+                {
+                    continue;
+                }
+
+                var messageJson = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                await ProcessIncomingMessageAsync(messageJson, terminalAttachment, webSocket);
+            }
+            catch (WebSocketException ex) when (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+            {
+                _logger.LogInformation("WebSocket connection closed by client");
+                break;
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing WebSocket message");
+                break;
+            }
         }
     }
 
@@ -362,6 +481,58 @@ public class WebSocketHost : IDisposable
         }
     }
 
+    private async Task ProcessIncomingMessageAsync(string messageJson, TerminalAttachment terminalAttachment, WebSocket webSocket)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(messageJson);
+            var typeProperty = document.RootElement.GetProperty("type").GetString();
+
+            switch (typeProperty)
+            {
+                case "stdin_input":
+                    var stdinMessage = JsonSerializer.Deserialize<StdinInputMessage>(messageJson);
+                    if (stdinMessage != null)
+                    {
+                        var data = stdinMessage.Mode == "text"
+                            ? Encoding.UTF8.GetBytes(stdinMessage.Data)
+                            : Convert.FromBase64String(stdinMessage.Data);
+                        terminalAttachment.WriteInput(data);
+                    }
+                    break;
+
+                case "resize":
+                    var resizeMessage = JsonSerializer.Deserialize<ResizeMessage>(messageJson);
+                    if (resizeMessage != null)
+                    {
+                        terminalAttachment.Resize(resizeMessage.Cols, resizeMessage.Rows);
+                    }
+                    break;
+
+                case "signal":
+                    var signalMessage = JsonSerializer.Deserialize<SignalMessage>(messageJson);
+                    if (signalMessage != null)
+                    {
+                        terminalAttachment.SendSignal(signalMessage.Name);
+                    }
+                    break;
+
+                case "ping":
+                    var pongMessage = new PongMessage();
+                    await SendMessageAsync(webSocket, pongMessage);
+                    break;
+
+                default:
+                    _logger.LogWarning("Unknown message type: {MessageType}", typeProperty);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing message: {Message}", messageJson);
+        }
+    }
+
     private async Task SendMessageAsync<T>(WebSocket webSocket, T message) where T : BaseMessage
     {
         try
@@ -398,10 +569,10 @@ public class WebSocketHost : IDisposable
     {
         return shell.ToLowerInvariant() switch
         {
-            "powershell" or "pwsh" => "powershell.exe -NoLogo -NoExit",
+            "powershell" or "pwsh" => "cmd.exe",
             "cmd" => "cmd.exe",
             "bash" => "bash.exe",
-            _ => "powershell.exe -NoLogo -NoExit"
+            _ => "cmd.exe"
         };
     }
 

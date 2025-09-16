@@ -7,6 +7,7 @@ using Serilog;
 using HostService.Transport;
 using HostService.Security;
 using HostService.Discovery;
+using HostService.Terminal;
 
 namespace HostService;
 
@@ -88,6 +89,7 @@ public class Program
 
                 // Register services
                 services.AddSingleton<DeviceRegistry>();
+                services.AddSingleton<TerminalDiscovery>();
                 services.AddSingleton<WebSocketHost>();
                 services.AddSingleton<LanDiscovery>();
 

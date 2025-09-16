@@ -1,7 +1,7 @@
 # Windows host service configuration
 HostId: "2e53e7f6-1417-4531-a5eb-23dee63d261e"
 HostToken: "763c5345ce872e066fbe38cced59828a19f4afba8214db1c4e8ab7046d6eb11b"
-Port: 8080
+Port: 8081
 DefaultShell: "powershell"
 TLSCertPath: "../certs/host.crt"
 TLSKeyPath: "../certs/host.key"

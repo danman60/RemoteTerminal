@@ -1,0 +1,513 @@
+{
+  "startTime": "2025-09-16T10:44:32.671Z",
+  "tests": [
+    {
+      "timestamp": "2025-09-16T10:44:32.671Z",
+      "level": "info",
+      "message": "🚀 Starting Comprehensive Debug Framework",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.672Z",
+      "level": "info",
+      "message": null,
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.672Z",
+      "level": "info",
+      "message": "🔍 Checking Environment Prerequisites",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.711Z",
+      "level": "success",
+      "message": "✅ Node.js: v24.4.0",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.813Z",
+      "level": "success",
+      "message": "✅ .NET: 9.0.305",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.852Z",
+      "level": "success",
+      "message": "✅ Git: git version 2.50.0.windows.1",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.920Z",
+      "level": "success",
+      "message": "✅ Java: ",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.939Z",
+      "level": "warn",
+      "message": "⚠️ ADB: 'adb' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.940Z",
+      "level": "success",
+      "message": "✅ Required file: host-windows/src/HostService/HostService.csproj",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.940Z",
+      "level": "success",
+      "message": "✅ Required file: websocket-proxy.js",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.940Z",
+      "level": "error",
+      "message": "❌ Required file: android-client/app/build.gradle",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.940Z",
+      "level": "success",
+      "message": "✅ Required file: test-client.js",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.940Z",
+      "level": "info",
+      "message": "🏥 Checking Service Health",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.950Z",
+      "level": "warn",
+      "message": "⚠️ Host Service not responding",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.955Z",
+      "level": "success",
+      "message": "✅ Proxy Service WebSocket",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.955Z",
+      "level": "info",
+      "message": "🚀 Starting Services (if needed)",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.955Z",
+      "level": "info",
+      "message": "🔍 Testing Terminal Discovery",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.956Z",
+      "level": "error",
+      "message": "❌ Terminal Discovery failed: Request failed with status code 400",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.957Z",
+      "level": "info",
+      "message": "🔌 Testing WebSocket Connectivity",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.960Z",
+      "level": "success",
+      "message": "✅ WebSocket connectivity successful",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.961Z",
+      "level": "info",
+      "message": "🔐 Testing Authentication Protocol",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.962Z",
+      "level": "info",
+      "message": "WebSocket connected, sending auth...",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.962Z",
+      "level": "info",
+      "message": "Authentication message sent",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.093Z",
+      "level": "info",
+      "message": "Received message:",
+      "data": {
+        "Type": "auth_ok",
+        "pty": {
+          "cols": 120,
+          "rows": 30
+        },
+        "shell": "powershell",
+        "type": "auth_ok",
+        "timestamp": 1758019473093
+      }
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.093Z",
+      "level": "success",
+      "message": "✅ Authentication successful",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.093Z",
+      "level": "info",
+      "message": "🖥️ Testing Terminal Attachment",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.093Z",
+      "level": "info",
+      "message": "🔐 Testing Authentication Protocol",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.095Z",
+      "level": "info",
+      "message": "WebSocket connected, sending auth...",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.095Z",
+      "level": "info",
+      "message": "Authentication message sent",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.210Z",
+      "level": "info",
+      "message": "Received message:",
+      "data": {
+        "Type": "auth_ok",
+        "pty": {
+          "cols": 120,
+          "rows": 30
+        },
+        "shell": "powershell",
+        "type": "auth_ok",
+        "timestamp": 1758019473210
+      }
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.210Z",
+      "level": "success",
+      "message": "✅ Authentication successful",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.210Z",
+      "level": "info",
+      "message": "Authentication successful, testing terminal attachment...",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.210Z",
+      "level": "info",
+      "message": "⚡ Testing ConPTY Fallback",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "ConPTY fallback automatically tested when terminal attachment fails",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "📡 Testing Message Protocol",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "Testing ping message...",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "Testing resize message...",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "Testing stdin_input message...",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "🚨 Testing Error Handling",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "Testing error handling: Invalid JSON",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "Testing error handling: Missing type",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "Testing error handling: Invalid auth",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "⏱️ Testing Connection Stability",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:33.211Z",
+      "level": "info",
+      "message": "Testing connection stability for 30 seconds...",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.212Z",
+      "level": "success",
+      "message": "✅ Connection stability test passed",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "info",
+      "message": "🏃 Testing Latency",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 1: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 2: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 3: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 4: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 5: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 6: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 7: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 8: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 9: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "debug",
+      "message": "Ping 10: 0ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "info",
+      "message": "Average latency: 0.00ms",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "info",
+      "message": "📱 Testing Android APK",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "success",
+      "message": "✅ APK file: android-client/app/build/outputs/apk/debug/app-debug.apk",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "info",
+      "message": "APK size: 16.81 MB",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.213Z",
+      "level": "info",
+      "message": "APK modified: 2025-09-16T02:55:45.525Z",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "warn",
+      "message": "ADB not available: 'adb' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "🎯 Testing End-to-End Workflow",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "End-to-end workflow steps:",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "  1. Service startup",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "  2. WebSocket connection",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "  3. Authentication",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "  4. Terminal discovery",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "  5. Terminal attachment or ConPTY fallback",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "  6. Command execution",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "  7. Output capture",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "  8. Connection cleanup",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "info",
+      "message": "🧹 Cleaning up...",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.233Z",
+      "level": "info",
+      "message": "📊 Generating Debug Report",
+      "data": null
+    }
+  ],
+  "services": {
+    "host": {
+      "status": "unhealthy",
+      "error": "Request failed with status code 400"
+    },
+    "proxy": {
+      "healthy": true,
+      "responseTime": 5
+    }
+  },
+  "errors": [
+    {
+      "timestamp": "2025-09-16T10:44:32.940Z",
+      "level": "error",
+      "message": "❌ Required file: android-client/app/build.gradle",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.956Z",
+      "level": "error",
+      "message": "❌ Terminal Discovery failed: Request failed with status code 400",
+      "data": null
+    }
+  ],
+  "warnings": [
+    {
+      "timestamp": "2025-09-16T10:44:32.939Z",
+      "level": "warn",
+      "message": "⚠️ ADB: 'adb' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:44:32.950Z",
+      "level": "warn",
+      "message": "⚠️ Host Service not responding",
+      "data": null
+    },
+    {
+      "timestamp": "2025-09-16T10:45:03.232Z",
+      "level": "warn",
+      "message": "ADB not available: 'adb' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n",
+      "data": null
+    }
+  ],
+  "endTime": "2025-09-16T10:45:03.233Z",
+  "duration": 30562
+}

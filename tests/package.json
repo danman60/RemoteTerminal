@@ -1,0 +1,49 @@
+{
+  "name": "remote-terminal-sync-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive testing framework for Remote Terminal Synchronization system",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test-runner.js",
+    "test:startup": "node test-runner.js --category startup",
+    "test:discovery": "node test-runner.js --category discovery",
+    "test:websocket": "node test-runner.js --category websocket",
+    "test:attachment": "node test-runner.js --category attachment",
+    "test:android": "node test-runner.js --category android",
+    "test:security": "node test-runner.js --category security",
+    "test:errors": "node test-runner.js --category errors",
+    "test:debug": "DEBUG=* node test-runner.js",
+    "test:report": "node test-runner.js --report",
+    "test:health-check": "node utils/health-check.js",
+    "test:host-only": "node test-runner.js --service host",
+    "test:proxy-only": "node test-runner.js --service proxy",
+    "test:android-only": "node test-runner.js --service android",
+    "test:diagnose": "node utils/diagnostic-report.js"
+  },
+  "dependencies": {
+    "ws": "^8.14.2",
+    "axios": "^1.5.0",
+    "playwright": "^1.38.0",
+    "adb-kit": "^3.2.0",
+    "node-forge": "^1.3.1",
+    "chalk": "^4.1.2",
+    "commander": "^11.0.0",
+    "fs-extra": "^11.1.1",
+    "uuid": "^9.0.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@types/node": "^20.6.0",
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "testing",
+    "remote-terminal",
+    "websocket",
+    "android",
+    "automation"
+  ],
+  "author": "Remote Terminal Sync Team",
+  "license": "MIT"
+}
