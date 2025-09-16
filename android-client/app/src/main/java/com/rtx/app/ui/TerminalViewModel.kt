@@ -55,9 +55,22 @@ class TerminalViewModel : ViewModel() {
     fun connect(hostAddress: String = "ws://107.179.180.231:8082") {
         viewModelScope.launch {
             try {
+                appendOutput("🚀 Attempting to connect to: $hostAddress")
+                appendOutput("📱 Android device starting connection process...")
+
+                // Add network diagnostics
+                val uri = java.net.URI(hostAddress)
+                appendOutput("🔍 Parsed URL components:")
+                appendOutput("  - Scheme: ${uri.scheme}")
+                appendOutput("  - Host: ${uri.host}")
+                appendOutput("  - Port: ${uri.port}")
+                appendOutput("  - Path: ${uri.path}")
+
                 webSocket.connect(hostAddress)
             } catch (e: Exception) {
-                appendOutput("Connection error: ${e.message}")
+                appendOutput("❌ Connection setup error: ${e.javaClass.simpleName}")
+                appendOutput("❌ Error message: ${e.message}")
+                appendOutput("❌ Stack trace: ${e.stackTraceToString()}")
                 _connectionState.value = ConnectionState.Error
             }
         }

@@ -32,17 +32,29 @@ class RtxWebSocket {
 
     suspend fun connect(hostAddress: String, deviceKey: String? = null) = withContext(Dispatchers.IO) {
         try {
+            onOutputReceived?.invoke("🔍 DEBUG: Starting connection to $hostAddress")
             onConnectionStateChanged?.invoke(State.CONNECTING)
 
+            // Log connection details
+            val isSecure = hostAddress.startsWith("wss://")
+            onOutputReceived?.invoke("🔍 DEBUG: Connection type: ${if (isSecure) "Secure (WSS)" else "Plain (WS)"}")
+
             val client = createOkHttpClient(hostAddress)
+            onOutputReceived?.invoke("🔍 DEBUG: OkHttpClient created successfully")
+
             val request = Request.Builder()
                 .url(hostAddress)
                 .build()
+            onOutputReceived?.invoke("🔍 DEBUG: WebSocket request built for URL: ${request.url}")
 
+            onOutputReceived?.invoke("🔍 DEBUG: Initiating WebSocket connection...")
             webSocket = client.newWebSocket(request, createWebSocketListener())
             okHttpClient = client
+            onOutputReceived?.invoke("🔍 DEBUG: WebSocket connection initiated")
 
         } catch (e: Exception) {
+            onOutputReceived?.invoke("❌ DEBUG: Connection setup failed: ${e.javaClass.simpleName}: ${e.message}")
+            onOutputReceived?.invoke("❌ DEBUG: Stack trace: ${e.stackTraceToString()}")
             onConnectionStateChanged?.invoke(State.ERROR)
             throw e
         }
@@ -74,8 +86,10 @@ class RtxWebSocket {
     }
 
     private fun createOkHttpClient(hostAddress: String): OkHttpClient {
+        onOutputReceived?.invoke("🔍 DEBUG: Creating OkHttpClient for $hostAddress")
+
         val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
+            level = HttpLoggingInterceptor.Level.BODY // More detailed logging
         }
 
         val builder = OkHttpClient.Builder()
@@ -88,9 +102,19 @@ class RtxWebSocket {
 
         // Only apply SSL certificate pinning for secure connections (wss://)
         if (hostAddress.startsWith("wss://")) {
+            onOutputReceived?.invoke("🔍 DEBUG: Applying SSL certificate pinning for secure connection")
             val (sslSocketFactory, trustManager) = CertPinning.createPinnedSSLContext()
             builder.sslSocketFactory(sslSocketFactory, trustManager)
+        } else {
+            onOutputReceived?.invoke("🔍 DEBUG: Using plain connection (no SSL)")
         }
+
+        onOutputReceived?.invoke("🔍 DEBUG: OkHttpClient configuration:")
+        onOutputReceived?.invoke("  - Connect timeout: 30s")
+        onOutputReceived?.invoke("  - Read timeout: None (persistent)")
+        onOutputReceived?.invoke("  - Write timeout: 30s")
+        onOutputReceived?.invoke("  - Ping interval: 30s")
+        onOutputReceived?.invoke("  - Retry on failure: true")
 
         return builder.build()
     }
@@ -98,39 +122,63 @@ class RtxWebSocket {
     private fun createWebSocketListener(): WebSocketListener {
         return object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
+                onOutputReceived?.invoke("✅ DEBUG: WebSocket connection opened successfully")
+                onOutputReceived?.invoke("🔍 DEBUG: Response code: ${response.code}")
+                onOutputReceived?.invoke("🔍 DEBUG: Response message: ${response.message}")
+                onOutputReceived?.invoke("🔍 DEBUG: Protocol: ${response.protocol}")
                 onConnectionStateChanged?.invoke(State.CONNECTED)
 
                 // Send authentication message
                 coroutineScope.launch {
-                    val deviceKey = getStoredDeviceKey() ?: generateAndStoreDeviceKey()
-                    val authMessage = AuthMessage(
-                        deviceKey = deviceKey,
-                        hostId = "", // Will be set by discovery or manual entry
-                        clientVersion = "1.0.0"
-                    )
-                    sendMessage(authMessage)
+                    try {
+                        val deviceKey = getStoredDeviceKey() ?: generateAndStoreDeviceKey()
+                        onOutputReceived?.invoke("🔍 DEBUG: Using device key: ${deviceKey.take(8)}...")
+                        val authMessage = AuthMessage(
+                            deviceKey = deviceKey,
+                            hostId = "", // Will be set by discovery or manual entry
+                            clientVersion = "1.0.0"
+                        )
+                        onOutputReceived?.invoke("🔍 DEBUG: Sending authentication message")
+                        sendMessage(authMessage)
+                    } catch (e: Exception) {
+                        onOutputReceived?.invoke("❌ DEBUG: Auth message failed: ${e.message}")
+                    }
                 }
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
+                onOutputReceived?.invoke("📨 DEBUG: Received message: ${text.take(100)}${if (text.length > 100) "..." else ""}")
                 coroutineScope.launch {
                     try {
                         parseAndHandleMessage(text)
                     } catch (e: Exception) {
-                        onOutputReceived?.invoke("Error parsing message: ${e.message}")
+                        onOutputReceived?.invoke("❌ DEBUG: Error parsing message: ${e.javaClass.simpleName}: ${e.message}")
                     }
                 }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                onOutputReceived?.invoke("⚠️ DEBUG: WebSocket closing - Code: $code, Reason: $reason")
                 onConnectionStateChanged?.invoke(State.DISCONNECTED)
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                onOutputReceived?.invoke("🔒 DEBUG: WebSocket closed - Code: $code, Reason: $reason")
                 onConnectionStateChanged?.invoke(State.DISCONNECTED)
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                onOutputReceived?.invoke("❌ DEBUG: WebSocket failure occurred")
+                onOutputReceived?.invoke("❌ DEBUG: Exception: ${t.javaClass.simpleName}: ${t.message}")
+                onOutputReceived?.invoke("❌ DEBUG: Response: ${response?.code} - ${response?.message}")
+                onOutputReceived?.invoke("❌ DEBUG: Stack trace: ${t.stackTraceToString()}")
+
+                // Additional network diagnostics
+                if (t.message?.contains("Failed to connect") == true) {
+                    onOutputReceived?.invoke("🔍 DEBUG: Network connectivity issue detected")
+                    onOutputReceived?.invoke("🔍 DEBUG: Check if the server is running and accessible")
+                }
+
                 onConnectionStateChanged?.invoke(State.ERROR)
                 onOutputReceived?.invoke("Connection failed: ${t.message}")
             }
