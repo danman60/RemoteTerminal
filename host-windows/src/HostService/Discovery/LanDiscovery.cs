@@ -16,12 +16,12 @@ public class LanDiscovery : IDisposable
         _config = config;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken = default)
+    public Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (!_config.Enabled)
         {
             _logger.LogInformation("LAN discovery is disabled");
-            return;
+            return Task.CompletedTask;
         }
 
         try
@@ -30,6 +30,7 @@ public class LanDiscovery : IDisposable
             // The current Zeroconf API doesn't support the host registration as used
             _logger.LogInformation("LAN discovery configured for {ServiceName} on port {Port} (host registration disabled in current implementation)",
                 _config.ServiceName, _config.Port);
+            return Task.CompletedTask;
         }
         catch (Exception ex)
         {
@@ -38,15 +39,17 @@ public class LanDiscovery : IDisposable
         }
     }
 
-    public async Task StopAsync()
+    public Task StopAsync()
     {
         try
         {
             _logger.LogInformation("LAN discovery service stopped");
+            return Task.CompletedTask;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error stopping LAN discovery service");
+            return Task.CompletedTask;
         }
     }
 

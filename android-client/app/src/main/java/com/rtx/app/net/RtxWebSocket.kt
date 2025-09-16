@@ -34,7 +34,7 @@ class RtxWebSocket {
         try {
             onConnectionStateChanged?.invoke(State.CONNECTING)
 
-            val client = createOkHttpClient()
+            val client = createOkHttpClient(hostAddress)
             val request = Request.Builder()
                 .url(hostAddress)
                 .build()
@@ -73,23 +73,26 @@ class RtxWebSocket {
         }
     }
 
-    private fun createOkHttpClient(): OkHttpClient {
+    private fun createOkHttpClient(hostAddress: String): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BASIC
         }
 
-        // Get certificate pinning configuration
-        val (sslSocketFactory, trustManager) = CertPinning.createPinnedSSLContext()
-
-        return OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .sslSocketFactory(sslSocketFactory, trustManager)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(0, TimeUnit.SECONDS) // No read timeout for persistent connection
             .writeTimeout(30, TimeUnit.SECONDS)
             .pingInterval(30, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
-            .build()
+
+        // Only apply SSL certificate pinning for secure connections (wss://)
+        if (hostAddress.startsWith("wss://")) {
+            val (sslSocketFactory, trustManager) = CertPinning.createPinnedSSLContext()
+            builder.sslSocketFactory(sslSocketFactory, trustManager)
+        }
+
+        return builder.build()
     }
 
     private fun createWebSocketListener(): WebSocketListener {

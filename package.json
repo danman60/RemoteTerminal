@@ -1,0 +1,25 @@
+{
+  "name": "remote-terminal-sync",
+  "version": "1.0.0",
+  "description": "A pure terminal sync system between Android apps and Windows host terminals with perfect fidelity. Commands execute on the Windows host using ConPTY while Android provides a clean terminal interface with full keyboard, voice, and navigation support.",
+  "main": "websocket-proxy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danman60/RemoteTerminal.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/danman60/RemoteTerminal/issues"
+  },
+  "homepage": "https://github.com/danman60/RemoteTerminal#readme",
+  "dependencies": {
+    "http-proxy-middleware": "^3.0.5",
+    "ws": "^8.18.3"
+  }
+}

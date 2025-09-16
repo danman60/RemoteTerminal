@@ -391,7 +391,7 @@ public class HostConfiguration
 {
     public string HostId { get; set; } = string.Empty;
     public string HostToken { get; set; } = string.Empty;
-    public int Port { get; set; } = 8443;
+    public int Port { get; set; } = 8081;
     public string DefaultShell { get; set; } = "powershell";
     public string TLSCertPath { get; set; } = string.Empty;
     public string TLSKeyPath { get; set; } = string.Empty;

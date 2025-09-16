@@ -21,7 +21,7 @@
     <string name="discovered_hosts">Discovered Hosts</string>
     <string name="manual_connection">Manual Connection</string>
     <string name="host_address">Host Address</string>
-    <string name="host_address_hint">wss://192.168.1.100:8443</string>
+    <string name="host_address_hint">ws://107.179.180.231:8082</string>
     <string name="refresh_hosts">Refresh</string>
     <string name="no_hosts_found">No hosts found on network</string>
     <string name="scanning_for_hosts">Scanning for hosts...</string>

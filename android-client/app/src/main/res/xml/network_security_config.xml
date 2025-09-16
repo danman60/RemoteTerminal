@@ -5,5 +5,8 @@
         <domain includeSubdomains="true">10.0.0.0</domain>
         <domain includeSubdomains="true">172.16.0.0</domain>
         <domain includeSubdomains="true">192.168.0.0</domain>
+        <domain includeSubdomains="false">107.179.180.231</domain>
     </domain-config>
+    <!-- Allow cleartext traffic for all domains during development -->
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

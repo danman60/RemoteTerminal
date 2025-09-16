@@ -52,7 +52,7 @@ class TerminalViewModel : ViewModel() {
         }
     }
 
-    fun connect(hostAddress: String = "wss://192.168.1.100:8443") {
+    fun connect(hostAddress: String = "ws://107.179.180.231:8082") {
         viewModelScope.launch {
             try {
                 webSocket.connect(hostAddress)
