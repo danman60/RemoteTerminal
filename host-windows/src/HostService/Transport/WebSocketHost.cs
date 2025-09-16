@@ -194,15 +194,20 @@ public class WebSocketHost : IDisposable
     {
         try
         {
+            _logger.LogInformation("Waiting for authentication message...");
             var buffer = new byte[4096];
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
 
+            _logger.LogInformation("Received message of type: {MessageType}, Length: {Length}", result.MessageType, result.Count);
+
             if (result.MessageType != WebSocketMessageType.Text)
             {
+                _logger.LogWarning("Invalid message type for authentication: {MessageType}", result.MessageType);
                 return (false, "Expected text message for authentication");
             }
 
             var messageJson = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            _logger.LogInformation("Authentication message received: {Message}", messageJson);
             var message = JsonSerializer.Deserialize<AuthMessage>(messageJson);
 
             if (message == null || string.IsNullOrEmpty(message.DeviceKey))

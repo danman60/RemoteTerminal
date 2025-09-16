@@ -79,6 +79,7 @@ class RtxWebSocket {
                 else -> return@withContext
             }
 
+            onOutputReceived?.invoke("🔍 DEBUG: Sending message as text: ${messageJson.take(100)}${if (messageJson.length > 100) "..." else ""}")
             webSocket?.send(messageJson)
         } catch (e: Exception) {
             onConnectionStateChanged?.invoke(State.ERROR)
