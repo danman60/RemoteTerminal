@@ -200,13 +200,22 @@ public class WebSocketHost : IDisposable
 
             _logger.LogInformation("Received message of type: {MessageType}, Length: {Length}", result.MessageType, result.Count);
 
-            if (result.MessageType != WebSocketMessageType.Text)
+            string messageJson;
+            if (result.MessageType == WebSocketMessageType.Text)
+            {
+                _logger.LogInformation("Processing as Text message");
+                messageJson = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            }
+            else if (result.MessageType == WebSocketMessageType.Binary)
+            {
+                _logger.LogInformation("Processing as Binary message (converting to text)");
+                messageJson = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            }
+            else
             {
                 _logger.LogWarning("Invalid message type for authentication: {MessageType}", result.MessageType);
-                return (false, "Expected text message for authentication");
+                return (false, "Expected text or binary message for authentication");
             }
-
-            var messageJson = Encoding.UTF8.GetString(buffer, 0, result.Count);
             _logger.LogInformation("Authentication message received: {Message}", messageJson);
             var message = JsonSerializer.Deserialize<AuthMessage>(messageJson);
 

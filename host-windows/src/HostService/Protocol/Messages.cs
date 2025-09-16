@@ -8,7 +8,7 @@ public abstract class BaseMessage
     public abstract string Type { get; }
 
     [JsonPropertyName("timestamp")]
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    public long Timestamp { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 }
 
 public class AuthMessage : BaseMessage
