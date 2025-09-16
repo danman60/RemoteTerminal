@@ -217,6 +217,22 @@ public class WebSocketHost : IDisposable
                 return (false, "Expected text or binary message for authentication");
             }
             _logger.LogInformation("Authentication message received: {Message}", messageJson);
+
+            // Check message type first
+            using var document = JsonDocument.Parse(messageJson);
+            if (!document.RootElement.TryGetProperty("type", out var typeElement))
+            {
+                _logger.LogWarning("Message missing 'type' property");
+                return (false, "Authentication message must have 'type' property");
+            }
+
+            var typeProperty = typeElement.GetString();
+            if (typeProperty != "auth")
+            {
+                _logger.LogWarning("Expected auth message, received: {MessageType}", typeProperty);
+                return (false, $"Expected authentication message, received: {typeProperty}");
+            }
+
             var message = JsonSerializer.Deserialize<AuthMessage>(messageJson);
 
             if (message == null || string.IsNullOrEmpty(message.DeviceKey))

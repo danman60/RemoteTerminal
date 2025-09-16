@@ -52,7 +52,7 @@ class TerminalViewModel : ViewModel() {
         }
     }
 
-    fun connect(hostAddress: String = "ws://107.179.180.231:8082") {
+    fun connect(hostAddress: String = "ws://192.168.0.67:8082") {
         viewModelScope.launch {
             try {
                 appendOutput("🚀 Attempting to connect to: $hostAddress")
